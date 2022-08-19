@@ -100,7 +100,7 @@ export function tcExpr(e : Expr<any>, classes : ClassEnv, functions : FunctionsE
       return { ...e, expr: tcuni, a: "int"}
     case "id": 
       if (!locals.has(e.name) && !globals.has(e.name)) {
-        throw new Error(`TypeError: ${e.name} not defined`)
+        throw new Error(`TypeError: ${e.name} is not defined`)
       }
       if (locals.has(e.name)) return {...e, a: locals.get(e.name)}
       return {...e, a: globals.get(e.name)}

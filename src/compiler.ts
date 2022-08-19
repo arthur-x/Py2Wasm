@@ -1,7 +1,7 @@
 import wabt from 'wabt'
 import { Stmt, Expr, Type, Op } from './ast'
 import { parseProgram } from './parser'
-import { tcProgram } from './tc'
+import { tcProgram } from './typechecker'
 
 type Env = Map<string, boolean>
 type ClassEnv = Map<string, [Stmt<Type>[], Stmt<Type>[]]>
@@ -202,11 +202,7 @@ export function codeGenStmt(stmt : Stmt<Type>, locals: Env, classes: ClassEnv) :
 
       const stmts = stmt.body.map(s => codeGenStmt(s, withParamsAndVariables, classes)).flat()
       const stmtsBody = stmts.join("\n")
-      return [`(func $${stmt.name} ${params} (result i32)
-        (local $scratch i32)
-        ${varDecls}
-        ${stmtsBody}
-        (i32.const 0))`]
+      return [`(func $${stmt.name} ${params} (result i32)\n(local $scratch i32)\n${varDecls}\n${stmtsBody}\n(i32.const 0))`]
     case "return":
       var valStmts = codeGenExpr(stmt.value, locals, classes)
       valStmts.push("return")
@@ -261,15 +257,7 @@ export function codeGenStmt(stmt : Stmt<Type>, locals: Env, classes: ClassEnv) :
     case "while":
       var condExprs = codeGenExpr(stmt.cond, locals, classes).flat().join('\n')
       var bodyStmts = stmt.body.map(s => codeGenStmt(s, locals, classes)).flat().join('\n')
-      return [`(block $myblock
-              (loop $myloop
-              ${condExprs}
-              (i32.const 1)
-              (i32.xor)
-              (br_if $myblock)
-              ${bodyStmts}
-              (br $myloop)
-              ))`]
+      return [`(block $myblock\n(loop $myloop\n${condExprs}\n(i32.const 1)\n(i32.xor)\n(br_if $myblock)\n${bodyStmts}\n(br $myloop)\n))`]
     case "if":
       var condExprs = codeGenExpr(stmt.cond, locals, classes).flat().join('\n')
       var bodyStmts = stmt.body.map(s => codeGenStmt(s, locals, classes)).flat().join('\n')
@@ -281,42 +269,17 @@ export function codeGenStmt(stmt : Stmt<Type>, locals: Env, classes: ClassEnv) :
         var elsebodyStmts = stmt.elsebody.map(s => codeGenStmt(s, locals, classes)).flat().join('\n')
       }
       if (typeof stmt.elifcond !== "undefined" && typeof stmt.elsebody !== "undefined") {
-        return [`${condExprs}
-                (if
-                (then ${bodyStmts})
-                (else
-                ${elifcondExprs}
-                (if
-                (then ${elifbodyStmts})
-                (else ${elsebodyStmts})
-                )
-                )
-                )`]
+        return [`${condExprs}\n(if\n(then ${bodyStmts})\n(else\n${elifcondExprs}\n
+                (if\n(then ${elifbodyStmts})\n(else ${elsebodyStmts})\n))\n)`]
       }
       else if (typeof stmt.elifcond !== "undefined") {
-        return [`${condExprs}
-        (if
-        (then ${bodyStmts})
-        (else
-        ${elifcondExprs}
-        (if
-        (then ${elifbodyStmts})
-        )
-        )
-        )`]
+        return [`${condExprs}\n(if\n(then ${bodyStmts})\n(else\n${elifcondExprs}\n(if\n(then ${elifbodyStmts})\n)\n)\n)`]
       }
       else if (typeof stmt.elsebody !== "undefined") {
-        return [`${condExprs}
-        (if
-        (then ${bodyStmts})
-        (else ${elsebodyStmts})
-        )`]
+        return [`${condExprs}\n(if\n(then ${bodyStmts})\n(else ${elsebodyStmts})\n)`]
       }
       else {
-        return [`${condExprs}
-        (if
-        (then ${bodyStmts})
-        )`]
+        return [`${condExprs}\n(if\n(then ${bodyStmts})\n)`]
       }
   }
 }
@@ -364,7 +327,7 @@ export function compile(source : string) : string {
 (global $heap (mut i32) (i32.const 0))
 ${varDecls}
 ${allFuns}
-(func (export "_start") ${retType}
+(func (export "__main__") ${retType}
 ${main}
 ${retVal})
 )`
@@ -376,5 +339,5 @@ export async function run(watSource : string, config: any) : Promise<number> {
   const parsed = wabtApi.parseWat("compiled", watSource)
   const binary = parsed.toBinary({})
   const wasmModule = await WebAssembly.instantiate(binary.buffer, importObject)
-  return (wasmModule.instance.exports as any)._start()
+  return (wasmModule.instance.exports as any).__main__()
 }
