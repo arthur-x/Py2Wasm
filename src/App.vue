@@ -101,10 +101,13 @@ button {
   font: inherit;
   background-color: #504563;
   cursor: pointer;
-  transition: 0.25s;
+  transition: background-color .25s, opacity .25s;
 }
 button:hover {
   background-color: #8b449e;
+}
+button:active {
+  opacity: 50%;
 }
 button[disabled] {
   opacity: 50%;
