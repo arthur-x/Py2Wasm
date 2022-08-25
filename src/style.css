@@ -1,9 +1,8 @@
 :root {
   font-family: Consolas, Menlo, Monaco, 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace, serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
+  font-size: 1em;
+  line-height: 1.5em;
+  font-weight: 500;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -13,6 +12,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --editor-width: 48vw;
+  --editor-height: 72vh;
+  --output-height: 22vh;
 }
 
 a {
@@ -38,10 +41,11 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  justify-content: space-evenly;
 }
 
 @media (prefers-color-scheme: light) {

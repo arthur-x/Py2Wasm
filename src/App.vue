@@ -57,30 +57,29 @@ export default {
 </script>
 
 <template>
-<main style="display: grid; grid-template-columns: 50% 50%; grid-gap: 10px;">
-  <div style="display: flex; flex-direction: column;">
-    <textarea id="python-code"></textarea>
-    <button style="margin-top: 10px;" @click="runButton" :disabled="working">Compile & Run</button>
-    <button style="margin-top: 10px;" @click="clear" :disabled="working">Clear</button>
+<div style="display: flex; flex-direction: column; justify-content: space-evenly;">
+  <textarea id="python-code"></textarea>
+  <div style="display: flex; flex-direction: column; justify-content: space-between; height: var(--output-height);">
+    <button @click="runButton" :disabled="working">Compile & Run</button>
+    <button @click="clear" :disabled="working">Clear</button>
   </div>
-  <div style="display: flex; flex-direction: column;">
-    <textarea id="wasm-code"></textarea>
-    <textarea style="margin-top: 10px;" readonly id="result" v-model="result" :class="{error: error}"></textarea>
-  </div>
-</main>
+</div>
+<div style="display: flex; flex-direction: column; justify-content: space-evenly;">
+  <textarea id="wasm-code"></textarea>
+  <textarea readonly v-model="result" :class="{error: error}"></textarea>
+</div>
 </template>
 
 <style scoped>
 textarea {
-  width: 534px;
-  height: 92px;
-  font-size: 1em;
-  font-weight: 500;
+  box-sizing: border-box;
+  width: var(--editor-width);
+  height: var(--output-height);
   resize: none;
   border: 1px solid transparent;
   border-radius: 10px;
   padding: 0.5em 2em;
-  font-family: inherit;
+  font: inherit;
   background-color: rgb(38, 79, 79);
   transition: background-color 0.25s;
 }
@@ -94,14 +93,12 @@ textarea.error {
 }
 
 button {
-  width: 600px;
-  height: 50px;
+  width: var(--editor-width);
+  height: calc(var(--output-height) / 2 - 1vh);
   border-radius: 10px;
   border: 1px solid transparent;
   padding: 0.5em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
+  font: inherit;
   background-color: #504563;
   cursor: pointer;
   transition: 0.25s;
